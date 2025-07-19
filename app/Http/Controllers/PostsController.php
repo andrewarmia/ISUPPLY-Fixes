@@ -22,7 +22,7 @@ class PostsController extends Controller
         $is_admin = $user->user_type == UserType::Admin->value;
         $posts = Post::query()
             ->with('author:id,name,user_type')
-            ->when($is_admin, fn($query) => $query->where('author_id', $user->id))
+            ->when(!$is_admin, fn($query) => $query->where('author_id', $user->id))
             ->latest()
             ->get();
 
