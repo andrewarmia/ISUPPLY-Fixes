@@ -31,8 +31,8 @@ class UserFactory extends Factory
             'user_type' => UserType::User->value, // Default to User type
             'national_id' => fake()->unique()->numerify('###########'),
             'phone_number' => fake()->unique()->numerify('01#########'),
-            'credit_card_number' => fake()->optional()->creditCardNumber(),
-            'wallet_balance' => fake()->optional()->numberBetween(0, 100000),
+            'credit_card_number' => fake()->optional()->randomElement(['TEST_CARD_1', 'TEST_CARD_2']), // Security: use test values instead of real credit card numbers
+            'wallet_balance' => fake()->optional()->randomElement([100, 200, 500]), // Security: use fixed test values
             'password' => static::$password
         ];
     }
