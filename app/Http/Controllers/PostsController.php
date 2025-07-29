@@ -54,6 +54,9 @@ class PostsController extends Controller
         $data['attachment_path'] = parent::storeFile($request->file('image'));
         Post::create($data);
 
+        // Security: log only non-sensitive data
+        logger(['action' => 'post_created', 'user_id' => auth()->id(), 'post_title' => substr($data['title'], 0, 50)]);
+
         return redirect()->route('posts.index')
             ->with('success', __('Post created successfully.'));
     }
@@ -86,12 +89,12 @@ class PostsController extends Controller
     public function update(UpdatePostRequest $request, Post $post)
     {
         Gate::authorize('update', $post);
-        $data = $request->all();
-        logger($data);
-
-        $data['attachment_path'] = parent::storeFile($request->file('image'), path: 'posts');
-
+        $data = $request->except(['image']);
+        $data['attachment_path'] = parent::storeFile($request->file('image'));
         $post->update($data);
+
+        // Security: log only non-sensitive data
+        logger(['action' => 'post_updated', 'user_id' => auth()->id(), 'post_id' => $post->id, 'post_title' => substr($data['title'], 0, 50)]);
 
         return redirect()->route('posts.index')
             ->with('success', __('Post updated successfully.'));
@@ -104,6 +107,9 @@ class PostsController extends Controller
     {
         Gate::authorize('delete', $post);
         $post->delete();
+
+        // Security: log only non-sensitive data
+        logger(['action' => 'post_deleted', 'user_id' => auth()->id(), 'post_id' => $post->id]);
 
         return redirect()->route('posts.index')
             ->with('success', __('Post deleted successfully.'));

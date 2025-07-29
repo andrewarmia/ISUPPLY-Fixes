@@ -12,8 +12,9 @@ export default function Edit({post}) {
         >
             <Head title={`Post ${post.title}`}/>
 
-            <p className="py-6 px-4 text-gray-900 dark:text-gray-100"
-               dangerouslySetInnerHTML={{__html: post.content}}/>
+            <p className="py-6 px-4 text-gray-900 dark:text-gray-100">
+                {post.content} {/* Security: removed dangerouslySetInnerHTML */}
+            </p>
 
         </AuthenticatedLayout>
     );

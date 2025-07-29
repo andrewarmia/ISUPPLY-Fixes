@@ -24,7 +24,7 @@ class UpdatePostRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'attachment_path' => 'nullable|file',
+            'attachment_path' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'], // Security: restrict file types and size
         ];
     }
 }
