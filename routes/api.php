@@ -9,8 +9,9 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-//TODO enable route authentication
-//Route::middleware(['auth:sanctum'])->group(function () {
-Route::get('users', ListUsersController::class)->name('api.users.search');
+// Enable authentication for user search API
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('users', ListUsersController::class)->name('api.users.search');
+});
 
 //});

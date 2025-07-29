@@ -32,9 +32,10 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+'lifetime' => (int) env('SESSION_LIFETIME', 30), // Security: reduced from 120 to 30 minutes
 
-    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
+'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', true), // Security: expire on browser close
+
 
     /*
     |--------------------------------------------------------------------------
@@ -47,7 +48,7 @@ return [
     |
     */
 
-    'encrypt' => env('SESSION_ENCRYPT', false),
+'encrypt' => env('SESSION_ENCRYPT', true), // Security: enable session encryption
 
     /*
     |--------------------------------------------------------------------------

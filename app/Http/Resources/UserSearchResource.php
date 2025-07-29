@@ -18,8 +18,10 @@ class UserSearchResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'user_type' => $this->user_type,
-            'email' => $this->email,
-            'national_id' => $this->national_id,
+            // Security: removed sensitive fields (email, national_id)
+            // Remove these lines:
+            // 'email' => $this->email,
+            // 'national_id' => $this->national_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

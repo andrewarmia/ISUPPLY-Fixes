@@ -20,10 +20,10 @@ class PostPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Post $post): bool
-    {
-        return true;
-    }
+public function view(User $user, Post $post): bool 
+{ 
+    return $user->id === $post->author_id || $user->user_type === 1; // Only owner or admin
+}
 
     /**
      * Determine whether the user can create models.
@@ -36,18 +36,18 @@ class PostPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Post $post): bool
-    {
-        return true;
-    }
+public function update(User $user, Post $post): bool 
+{ 
+    return $user->id === $post->author_id || $user->user_type === 1; // Only owner or admin
+}
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Post $post): bool
-    {
-        return $user->id === $post->author_id || $user->user_type === UserType::Admin->value;
-    }
+public function delete(User $user, Post $post): bool 
+{ 
+    return $user->id === $post->author_id || $user->user_type === 1; // Only owner or admin
+}
 
     /**
      * Determine whether the user can restore the model.
