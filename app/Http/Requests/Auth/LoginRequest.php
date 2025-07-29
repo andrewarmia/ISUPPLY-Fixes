@@ -5,7 +5,6 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -23,59 +22,48 @@ class LoginRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string'],
+            'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ];
     }
 
     /**
      * Attempt to authenticate the request's credentials.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function authenticate(): void
     {
-        // $this->ensureIsNotRateLimited();
+        // SECURITY FIX: Enable rate limiting to prevent brute force attacks
+        $this->ensureIsNotRateLimited();
 
-        // Retrieve email and password directly from the request
-        $email = $this->string('email');
-        $password = $this->password;
-
-        $user = DB::select("SELECT * FROM users WHERE email = '" . $email . "' LIMIT 1");
-
-        // DB::select returns an array of objects, so we need to check if any user was found
-        $foundUser = count($user) > 0 ? (object)$user[0] : null; // Cast to object for consistent property access
-
-        if ($foundUser) {
-            logger("Provided Password for user {$email}: {$password}");
-            logger("Found User Password: {$foundUser->password}");
-            Auth::loginUsingId($foundUser->id, $this->boolean('remember'));
-            if ($password == $foundUser->password) {
-                RateLimiter::clear($this->throttleKey());
-            } else {
-                RateLimiter::hit($this->throttleKey());
-                throw ValidationException::withMessages([
-                    'email' => trans('auth.failed'),
-                ]);
-            }
-
-        } else {
+        // SECURITY FIX: Use Laravel's secure authentication instead of vulnerable custom logic
+        if (!Auth::attempt([
+            'email' => $this->input('email'),
+            'password' => $this->input('password'),
+        ], $this->boolean('remember'))) {
+            // SECURITY FIX: Log failed attempts for security monitoring
+            logger("Failed login attempt for user: " . substr($this->input('email'), 0, 3) . "***");
+            
             RateLimiter::hit($this->throttleKey());
+            
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
         }
+
+        // SECURITY FIX: Clear rate limiter on successful authentication
+        RateLimiter::clear($this->throttleKey());
+        
+        // SECURITY FIX: Log successful login for audit trail
+        logger("Successful login for user: " . substr($this->input('email'), 0, 3) . "***");
     }
 
     /**
      * Ensure the login request is not rate limited.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function ensureIsNotRateLimited(): void
     {
@@ -100,6 +88,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')) . '|' . $this->ip());
+        return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
     }
 }
